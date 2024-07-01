@@ -856,54 +856,39 @@ public class DefaultBoxAndWhiskerCategoryDataset<R extends Comparable<R>,
         this.maximumRangeValue = Double.NaN;
         this.maximumRangeValueRow = -1;
         this.maximumRangeValueColumn = -1;
-
         int rowCount = getRowCount();
         int columnCount = getColumnCount();
         for (int r = 0; r < rowCount; r++) {
-            updateBoundsForRow(r, columnCount);
-        }
-    }
-
-    private void updateBoundsForRow(int row, int columnCount) {
-        for (int c = 0; c < columnCount; c++) {
-            updateBoundsForCell(row, c);
-        }
-    }
-
-    private void updateBoundsForCell(int row, int column) {
-        BoxAndWhiskerItem item = getItem(row, column);
-        if (item != null) {
-            updateMinimumRangeValue(row, column, item);
-            updateMaximumRangeValue(row, column, item);
-        }
-    }
-
-    private void updateMinimumRangeValue(int row, int column, BoxAndWhiskerItem item) {
-        Number min = item.getMinOutlier();
-        if (min != null) {
-            double minv = min.doubleValue();
-            if (!Double.isNaN(minv) && (minv < this.minimumRangeValue || Double.isNaN(
-                    this.minimumRangeValue))) {
-                this.minimumRangeValue = minv;
-                this.minimumRangeValueRow = row;
-                this.minimumRangeValueColumn = column;
+            for (int c = 0; c < columnCount; c++) {
+                BoxAndWhiskerItem item = getItem(r, c);
+                if (item != null) {
+                    Number min = item.getMinOutlier();
+                    if (min != null) {
+                        double minv = min.doubleValue();
+                        if (!Double.isNaN(minv)) {
+                            if (minv < this.minimumRangeValue || Double.isNaN(
+                                    this.minimumRangeValue)) {
+                                this.minimumRangeValue = minv;
+                                this.minimumRangeValueRow = r;
+                                this.minimumRangeValueColumn = c;
+                            }
+                        }
+                    }
+                    Number max = item.getMaxOutlier();
+                    if (max != null) {
+                        double maxv = max.doubleValue();
+                        if (!Double.isNaN(maxv)) {
+                            if (maxv > this.maximumRangeValue || Double.isNaN(
+                                    this.maximumRangeValue)) {
+                                this.maximumRangeValue = maxv;
+                                this.maximumRangeValueRow = r;
+                                this.maximumRangeValueColumn = c;
+                            }
+                        }
+                    }
+                }
             }
         }
-    }
-
-    private void updateMaximumRangeValue(int row, int column, BoxAndWhiskerItem item) {
-        Number max = item.getMaxOutlier();
-        if (max != null) {
-            double maxv = max.doubleValue();
-            if (!Double.isNaN(maxv) && (maxv > this.maximumRangeValue || Double.isNaN(
-                    this.maximumRangeValue))) {
-                this.maximumRangeValue = maxv;
-                this.maximumRangeValueRow = row;
-                this.maximumRangeValueColumn = column;
-            }
-        }
-    }
-//Refactoring end
     }
 
     /**
