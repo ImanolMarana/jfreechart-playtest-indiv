@@ -161,70 +161,78 @@ public class RendererUtils {
             return 0;
         }
         if (dataset.getDomainOrder() == DomainOrder.ASCENDING) {
-            int low = 0;
-            int high = itemCount - 1;
-            double lowValue = dataset.getXValue(series, low);
-            if (lowValue > xHigh) {
-                return low;
-            }
-            double highValue = dataset.getXValue(series, high);
-            if (highValue <= xHigh) {
-                return high;
-            }
-            int mid = (low + high) / 2;
-            while (high - low > 1) {
-                double midV = dataset.getXValue(series, mid);
-                if (midV <= xHigh) {
-                    low = mid;
-                }
-                else {
-                    high = mid;
-                }
-                mid = (low + high) / 2;
-            }
-            return mid;
+            return findUpperBoundAscending(dataset, series, xLow, xHigh, itemCount);
+        } else if (dataset.getDomainOrder() == DomainOrder.DESCENDING) {
+            return findUpperBoundDescending(dataset, series, xLow, xHigh, itemCount);
+        } else {
+            return findUpperBoundUnknownOrder(dataset, series, xHigh, itemCount);
         }
-        else if (dataset.getDomainOrder() == DomainOrder.DESCENDING) {
-            // when the x-values are descending, the upper bound is found by
-            // comparing against xLow
-            int low = 0;
-            int high = itemCount - 1;
-            int mid = (low + high) / 2;
-            double lowValue = dataset.getXValue(series, low);
-            if (lowValue < xLow) {
-                return low;
-            }
-            double highValue = dataset.getXValue(series, high);
-            if (highValue >= xLow) {
-                return high;
-            }
-            while (high - low > 1) {
-                double midV = dataset.getXValue(series, mid);
-                if (midV >= xLow) {
-                    low = mid;
-                }
-                else {
-                    high = mid;
-                }
-                mid = (low + high) / 2;
-            }
-            return mid;
+    }
+
+    private static int findUpperBoundAscending(XYDataset dataset, int series, double xLow,
+                                            double xHigh, int itemCount) {
+        int low = 0;
+        int high = itemCount - 1;
+        double lowValue = dataset.getXValue(series, low);
+        if (lowValue > xHigh) {
+            return low;
         }
-        else {
-            // we don't know anything about the ordering of the x-values,
-            // but we can still skip any trailing values that fall outside the
-            // range...
-            int index = itemCount - 1;
-            // skip any items that don't need including...
-            double x = dataset.getXValue(series, index);
-            while (index >= 0 && x > xHigh) {
-                index--;
-                if (index >= 0) {
-                    x = dataset.getXValue(series, index);
-                }
-            }
-            return Math.max(index, 0);
+        double highValue = dataset.getXValue(series, high);
+        if (highValue <= xHigh) {
+            return high;
         }
+        int mid = (low + high) / 2;
+        while (high - low > 1) {
+            double midV = dataset.getXValue(series, mid);
+            if (midV <= xHigh) {
+                low = mid;
+            } else {
+                high = mid;
+            }
+            mid = (low + high) / 2;
+        }
+        return mid;
+    }
+
+    private static int findUpperBoundDescending(XYDataset dataset, int series, double xLow,
+                                             double xHigh, int itemCount) {
+        int low = 0;
+        int high = itemCount - 1;
+        int mid = (low + high) / 2;
+        double lowValue = dataset.getXValue(series, low);
+        if (lowValue < xLow) {
+            return low;
+        }
+        double highValue = dataset.getXValue(series, high);
+        if (highValue >= xLow) {
+            return high;
+        }
+        while (high - low > 1) {
+            double midV = dataset.getXValue(series, mid);
+            if (midV >= xLow) {
+                low = mid;
+            } else {
+                high = mid;
+            }
+            mid = (low + high) / 2;
+        }
+        return mid;
+    }
+
+    private static int findUpperBoundUnknownOrder(XYDataset dataset, int series,
+                                                double xHigh, int itemCount) {
+        int index = itemCount - 1;
+        double x = dataset.getXValue(series, index);
+        while (index >= 0 && x > xHigh) {
+            index--;
+            if (index >= 0) {
+                x = dataset.getXValue(series, index);
+            }
+        }
+        return Math.max(index, 0);
+    }
+
+//Refactoring end
     }
 
     /**
